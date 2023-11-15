@@ -7,6 +7,8 @@ using UnityEngine;
 public class Spawner : MonoBehaviour, INetworkRunnerCallbacks
 {
     public NetworkPlayer playerPrefab;
+
+    private CharacterInputHandler _characterInputHandler;
     
     // Start is called before the first frame update
     void Start()
@@ -35,7 +37,17 @@ public class Spawner : MonoBehaviour, INetworkRunnerCallbacks
 
     public void OnInput(NetworkRunner runner, NetworkInput input)
     {
-        // Debug.Log("New input");
+        // check if we actually get the character controller for the correct player
+        if (_characterInputHandler == null && NetworkPlayer.Local != null)
+        {
+            // we actually have a local network player!
+            _characterInputHandler = NetworkPlayer.Local.GetComponent<CharacterInputHandler>();
+        }
+
+        if (_characterInputHandler != null)
+        {
+            input.Set(_characterInputHandler.GetNetworkInput());
+        }
     }
 
     public void OnInputMissing(NetworkRunner runner, PlayerRef player, NetworkInput input)
