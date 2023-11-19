@@ -7,6 +7,7 @@ using Fusion;
 using Fusion.Sockets;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using Object = System.Object;
 
 public class NetworkRunnerHandler : MonoBehaviour
 {
@@ -18,10 +19,15 @@ public class NetworkRunnerHandler : MonoBehaviour
     {
         _networkRunner = Instantiate(networkRunnerPrefab);
         _networkRunner.name = "Network runner";
-
-        var clientTask = InitNetworkRunner(_networkRunner, GameMode.AutoHostOrClient, NetAddress.Any(),
+#if UNITY_SERVER
+        var clientTask = InitNetworkRunner(_networkRunner, GameMode.Server, NetAddress.Any(),
             SceneManager.GetActiveScene().buildIndex, null);
         Debug.Log("Server NetworkRunner started");
+#else
+        var clientTask = InitNetworkRunner(_networkRunner, GameMode.Client, NetAddress.Any(),
+            SceneManager.GetActiveScene().buildIndex, null);
+        Debug.Log("Server NetworkRunner started");
+#endif
     }
 
     protected virtual Task InitNetworkRunner(NetworkRunner runner, GameMode gameMode, NetAddress address,
