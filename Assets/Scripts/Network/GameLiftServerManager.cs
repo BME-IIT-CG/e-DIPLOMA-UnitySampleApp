@@ -2,10 +2,12 @@
 using Aws.GameLift.Server;
 using System.Collections.Generic;
 using System;
+using System.Collections;
 using System.Linq;
 using System.Threading.Tasks;
 using Fusion;
 using Fusion.Sockets;
+using PimDeWitte.UnityMainThreadDispatcher;
 using UnityEngine.SceneManagement;
 
 public class GameLiftServerManager : MonoBehaviour
@@ -14,9 +16,17 @@ public class GameLiftServerManager : MonoBehaviour
 
     private NetworkRunner _networkRunner;
 
+    private int _activeScene;
+
 #if UNITY_SERVER
     private void Start()
     {
+        Debug.Log("Before Instantiate");
+        _networkRunner = Instantiate(networkRunnerPrefab);
+        Debug.Log("After Instantiate");
+        _networkRunner.name = "Network runner";
+
+        _activeScene = SceneManager.GetActiveScene().buildIndex;
         
         var initSDKOutcome = GameLiftServerAPI.InitSDK();
         if (initSDKOutcome.Success)
@@ -60,12 +70,15 @@ public class GameLiftServerManager : MonoBehaviour
     //Once the game server is ready to receive incoming player connections, it should invoke GameLiftServerAPI.ActivateGameSession()
     private void OnStartGameSession(Aws.GameLift.Server.Model.GameSession gameSession)
     {   
+        print("OnStartGameSession called");
         //CreatePhotonSession(gameSession.GameSessionId, gameSession.MaximumPlayerSessionCount, gameSession.Port);
         // create photon session and start game
-        NetworkRunnerStart(GameMode.Server);
+        UnityMainThreadDispatcher.Instance().Enqueue(NetworkRunnerStart(GameMode.Server));
+        print("NetworkRunnerStart finished");
         // TODO: initialize scene for new session
         
         GameLiftServerAPI.ActivateGameSession();
+        print("GameLiftServerAPI.ActivateGameSession() called");
 
         Debug.Log($"GameLift: Session activated. Game session ID: {gameSession.GameSessionId}, port: {gameSession.Port}, player count: {gameSession.MaximumPlayerSessionCount}.");
     }
@@ -76,6 +89,7 @@ public class GameLiftServerManager : MonoBehaviour
     //updateReason is the reason this update is being supplied.
     private void OnUpdateGameSession(Aws.GameLift.Server.Model.UpdateGameSession updateGameSession)
     {
+        // TODO: Authenticate here?
     }
 
     //OnProcessTerminate callback. GameLift will invoke this callback before shutting down an instance hosting this game server.
@@ -157,21 +171,39 @@ public class GameLiftServerManager : MonoBehaviour
 #else
     private void Start()
     {
+        Debug.Log("Before Instantiate");
+        _networkRunner = Instantiate(networkRunnerPrefab);
+        Debug.Log("After Instantiate");
+        _networkRunner.name = "Network runner";
+
+        var activeScene = SceneManager.GetActiveScene().buildIndex;
         NetworkRunnerStart(GameMode.Client);
     }
 #endif
-    void NetworkRunnerStart(GameMode gameMode)
+    IEnumerator NetworkRunnerStart(GameMode gameMode)
     {
-        _networkRunner = Instantiate(networkRunnerPrefab);
-        _networkRunner.name = "Network runner";
-        var clientTask = InitNetworkRunner(_networkRunner, gameMode, NetAddress.Any(),
-            SceneManager.GetActiveScene().buildIndex, null);
+        Debug.Log("Inside NetworkRunnerStart");
+        try
+        {
+            var clientTask = InitNetworkRunner(_networkRunner, gameMode, NetAddress.Any(),
+                _activeScene, null);
+        }
+        catch (Exception e)
+        {
+            Debug.Log(e);
+            throw;
+        }
+
         Debug.Log("Server NetworkRunner started");
+        yield return null;
     }
 
     Task InitNetworkRunner(NetworkRunner runner, GameMode gameMode, NetAddress address,
         SceneRef scene, Action<NetworkRunner> initialized)
     {
+        // TODO: these cannot be called outside of main thread (e. g. callback thread), so InitNetworkRunner must be called inside Start, and move runner.StartGame to OnGameSessionStart
+        
+        Debug.Log("Inside InitNetworkRunner");
         var sceneManager = runner.GetComponents(typeof(MonoBehaviour)).OfType<INetworkSceneManager>().FirstOrDefault();
 
         if (sceneManager == null)
