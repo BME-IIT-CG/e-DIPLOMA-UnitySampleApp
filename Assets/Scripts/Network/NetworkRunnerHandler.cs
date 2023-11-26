@@ -19,7 +19,12 @@ public class NetworkRunnerHandler : MonoBehaviour
     {
         _networkRunner = Instantiate(networkRunnerPrefab);
         _networkRunner.name = "Network runner";
-        var clientTask = InitNetworkRunner(_networkRunner, GameMode.Client, NetAddress.Any(),
+#if UNITY_SERVER
+        var gameMode = GameMode.Server;
+#else
+        var gameMode = GameMode.Client;
+#endif  
+        var clientTask = InitNetworkRunner(_networkRunner, gameMode, NetAddress.Any(),
             SceneManager.GetActiveScene().buildIndex, null);
         Debug.Log("Server NetworkRunner started");
     }
@@ -36,6 +41,7 @@ public class NetworkRunnerHandler : MonoBehaviour
 
         runner.ProvideInput = true;
 
+        Debug.Log("Starting Photon Session...");
         return runner.StartGame(new StartGameArgs
         {
             GameMode = gameMode,

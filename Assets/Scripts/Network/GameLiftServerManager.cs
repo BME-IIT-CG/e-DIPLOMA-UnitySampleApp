@@ -176,8 +176,8 @@ public class GameLiftServerManager : MonoBehaviour
         Debug.Log("After Instantiate");
         _networkRunner.name = "Network runner";
 
-        var activeScene = SceneManager.GetActiveScene().buildIndex;
-        NetworkRunnerStart(GameMode.Client);
+        _activeScene = SceneManager.GetActiveScene().buildIndex;
+        UnityMainThreadDispatcher.Instance().Enqueue(NetworkRunnerStart(GameMode.Client));
     }
 #endif
     IEnumerator NetworkRunnerStart(GameMode gameMode)
