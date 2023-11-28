@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Fusion;
 using Fusion.Sample.DedicatedServer.Utils;
 using Fusion.Sockets;
+using GameLiftDemo.UtilException.CLException;
 using PimDeWitte.UnityMainThreadDispatcher;
 using UnityEngine.SceneManagement;
 
@@ -119,7 +120,12 @@ public class GameLiftServerManager : MonoBehaviour
     private int GetPort()
     {
         string value;
-        CommandLineUtils.TryGetArg(out value,  "serverIp");
+        string argName = "-serverIp";
+        if (!CommandLineUtils.TryGetArg(out value, argName))
+        {
+            throw new MissingCommandLineParameterException(argName);
+        }
+        Debug.Log("Port read from command line: " + value);
         try
         {
             return int.Parse(value);
