@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System;
 using System.Collections;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Fusion;
 using Fusion.Sample.DedicatedServer.Utils;
@@ -75,7 +76,8 @@ public class GameLiftServerManager : MonoBehaviour
         print("OnStartGameSession called");
         //CreatePhotonSession(gameSession.GameSessionId, gameSession.MaximumPlayerSessionCount, gameSession.Port);
         // create photon session and start game
-        UnityMainThreadDispatcher.Instance().Enqueue(NetworkRunnerStart(GameMode.Server));
+        Debug.Log(gameSession);
+        UnityMainThreadDispatcher.Instance().Enqueue(NetworkRunnerStart(GameMode.Server, gameSession.GameSessionId));
         print("NetworkRunnerStart finished");
         // TODO: initialize scene for new session
         
@@ -119,13 +121,13 @@ public class GameLiftServerManager : MonoBehaviour
     #region DEDICATED_SERVER_TODO
     private int GetPort()
     {
-        string value;
-        string argName = "-serverIp";
+        string value = "7777";
+        /*string argName = "-serverIp";
         if (!CommandLineUtils.TryGetArg(out value, argName))
         {
             throw new MissingCommandLineParameterException(argName);
         }
-        Debug.Log("Port read from command line: " + value);
+        Debug.Log("Port read from command line: " + value);*/
         try
         {
             return int.Parse(value);
@@ -196,16 +198,24 @@ public class GameLiftServerManager : MonoBehaviour
         _networkRunner.name = "Network runner";
 
         _activeScene = SceneManager.GetActiveScene().buildIndex;
-        UnityMainThreadDispatcher.Instance().Enqueue(NetworkRunnerStart(GameMode.Client));
+
+        string sessionId;
+        string argName = "-GLID";
+        if (!CommandLineUtils.TryGetArg(out sessionId, argName))
+        {
+            throw new MissingCommandLineParameterException(argName);
+        }
+        
+        UnityMainThreadDispatcher.Instance().Enqueue(NetworkRunnerStart(GameMode.Client, sessionId));
     }
 #endif
-    IEnumerator NetworkRunnerStart(GameMode gameMode)
+    IEnumerator NetworkRunnerStart(GameMode gameMode, string sessionId)
     {
         Debug.Log("Inside NetworkRunnerStart");
         try
         {
             var clientTask = InitNetworkRunner(_networkRunner, gameMode, NetAddress.Any(),
-                _activeScene, null);
+                _activeScene, sessionId, null);
         }
         catch (Exception e)
         {
@@ -218,7 +228,7 @@ public class GameLiftServerManager : MonoBehaviour
     }
 
     Task InitNetworkRunner(NetworkRunner runner, GameMode gameMode, NetAddress address,
-        SceneRef scene, Action<NetworkRunner> initialized)
+        SceneRef scene, string sessionId, Action<NetworkRunner> initialized)
     {
         // TODO: these cannot be called outside of main thread (e. g. callback thread), so InitNetworkRunner must be called inside Start, and move runner.StartGame to OnGameSessionStart
         
@@ -232,12 +242,15 @@ public class GameLiftServerManager : MonoBehaviour
 
         runner.ProvideInput = true;
 
+        Debug.Log("Initializing runner with the following arguments:");
+        Debug.Log("GameMode: " + gameMode);
+        Debug.Log("SessionName: " + sessionId);
         return runner.StartGame(new StartGameArgs
         {
             GameMode = gameMode,
             Address = address,
             Scene = scene,
-            SessionName = "TestRoom",
+            SessionName = sessionId,
             Initialized = initialized,
             SceneManager = sceneManager
         });
