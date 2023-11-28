@@ -6,6 +6,7 @@ using System.Collections;
 using System.Linq;
 using System.Threading.Tasks;
 using Fusion;
+using Fusion.Sample.DedicatedServer.Utils;
 using Fusion.Sockets;
 using PimDeWitte.UnityMainThreadDispatcher;
 using UnityEngine.SceneManagement;
@@ -90,6 +91,8 @@ public class GameLiftServerManager : MonoBehaviour
     private void OnUpdateGameSession(Aws.GameLift.Server.Model.UpdateGameSession updateGameSession)
     {
         // TODO: Authenticate here?
+        // check if there are players
+        // get player id info from session
     }
 
     //OnProcessTerminate callback. GameLift will invoke this callback before shutting down an instance hosting this game server.
@@ -115,8 +118,17 @@ public class GameLiftServerManager : MonoBehaviour
     #region DEDICATED_SERVER_TODO
     private int GetPort()
     {
-        // TODO: get listening port from command-line argument.
-        return 7777;
+        string value;
+        CommandLineUtils.TryGetArg(out value,  "serverIp");
+        try
+        {
+            return int.Parse(value);
+        }
+        catch (Exception e)
+        {
+            Debug.Log(e);
+            throw;
+        }
     }
 
     private void CreatePhotonSession(string gameSessionId, int maxPlayers, int port)
@@ -141,6 +153,7 @@ public class GameLiftServerManager : MonoBehaviour
         if (result.Success)
         {
             // TODO: accept and spawn player, set nickname optionally.
+            // KICK FROM PHOTON SESSION OR DO NOT LET START PHOTON SESSION ON CLIENT
 
             // User the following code to get the name of the accepted player:
             var describePlayerSessionsResult = GameLiftServerAPI.DescribePlayerSessions(new Aws.GameLift.Server.Model.DescribePlayerSessionsRequest { 
