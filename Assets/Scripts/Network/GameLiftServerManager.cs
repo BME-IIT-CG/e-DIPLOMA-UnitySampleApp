@@ -121,13 +121,13 @@ public class GameLiftServerManager : MonoBehaviour
     #region DEDICATED_SERVER_TODO
     private int GetPort()
     {
-        string value = "7777";
-        /*string argName = "-serverIp";
+        string value = "9999";
+        string argName = "-serverIp";
         if (!CommandLineUtils.TryGetArg(out value, argName))
         {
             throw new MissingCommandLineParameterException(argName);
         }
-        Debug.Log("Port read from command line: " + value);*/
+        Debug.Log("Port read from command line: " + value);
         try
         {
             return int.Parse(value);
