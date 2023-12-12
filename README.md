@@ -6,7 +6,13 @@
 
  - Unity
  - Photon registration and Fusion App ID
+     - https://dashboard.photonengine.com/
  - AWS CLI tool
+     - https://aws.amazon.com/gamelift/getting-started/
+ - Photon Fusion library imported manually or using the Unity plugin (`Photon` directory in root)
+     - https://doc.photonengine.com/fusion/current/getting-started/sdk-download
+ - GameLiftServerSDK binaries imported into `Plugins` directory in root
+     - https://gamelift-server-sdk-release.s3.us-west-2.amazonaws.com/csharp/GameLift-CSharp-ServerSDK-4.0.2.zip
  - Client and headless build
 
  ## Building
