@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace Fusion.Sample.DedicatedServer.Utils {
   public class CommandLineUtils {
@@ -52,7 +53,6 @@ namespace Fusion.Sample.DedicatedServer.Utils {
           }
         }
       }
-
       return false;
     }
   }

@@ -13,18 +13,6 @@ public class CharacterMovementHandler : NetworkBehaviour
         _networkCharacterControllerPrototypeCustom = GetComponent<NetworkCharacterControllerPrototypeCustom>();
     }
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
     public override void FixedUpdateNetwork()
     {
         // server moves thing, server simulates everything!
