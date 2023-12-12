@@ -122,7 +122,7 @@ public class GameLiftServerManager : MonoBehaviour
     private int GetPort()
     {
         string value = "9999";
-        string argName = "-serverIp";
+        string argName = "-serverPort";
         if (!CommandLineUtils.TryGetArg(out value, argName))
         {
             throw new MissingCommandLineParameterException(argName);
@@ -138,21 +138,6 @@ public class GameLiftServerManager : MonoBehaviour
             throw;
         }
     }
-
-    private void CreatePhotonSession(string gameSessionId, int maxPlayers, int port)
-    {
-        /* TODO: create Photon session.
-         * 
-         * NetworkRunner.StartGame(new StartGameArgs() {
-         *   GameMode = GameMode.Server,
-         *   Address = NetAddress.Any(port)
-         *   SessionName = gameSessionId,
-         *   PlayerCount = maxPlayers,
-         *   ...
-         * });
-         */
-    }
-
     private void AuthenticateClient(string playerSessionId)
     {
         // AcceptPlayerSession() checks if the playerSessionId (sent by the client) is valid.

@@ -206,10 +206,9 @@ MonoBehaviour:
   TargetInterpolationDelay: 0.03
   gravity: -20
   jumpImpulse: 8
-  acceleration: 10
+  acceleration: 20
   braking: 10
-  maxSpeed: 2
-  rotationSpeed: 15
+  maxSpeed: 20
   _IsGrounded: 0
   _Velocity: {x: 0, y: 0, z: 0}
 --- !u!114 &4046028196454490896
